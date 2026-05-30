@@ -1,10 +1,26 @@
-// Create a file full_server/utils.js, in the file create a function named
-// readDatabase that accepts a file path
+import fs from 'fs';
 
-import countStudents from '../3-read_file_async';
+const readDatabase = (filePath) => new Promise((resolve, reject) => {
+  fs.readFile(filePath, 'utf8', (error, data) => {
+    if (error) {
+      reject(error);
+      return;
+    }
 
-// read the database asynchronously
+    const rows = data.split('\n').filter((line) => line.trim() !== '');
+    const students = rows.slice(1);
+    const byField = {};
 
-const readDatabase = (path) => countStudents(path);
+    students.forEach((student) => {
+      const [firstname, , , field] = student.split(',');
+      if (!byField[field]) {
+        byField[field] = [];
+      }
+      byField[field].push(firstname);
+    });
 
-module.exports = readDatabase;
+    resolve(byField);
+  });
+});
+
+export default readDatabase;
